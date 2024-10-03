@@ -772,3 +772,96 @@ AIPrintItemUse_:
 AIBattleUseItemText:
 	text_far _AIBattleUseItemText
 	text_end
+
+CheckAdvantageousSwitch:
+    ; Check if current Pokemon is at a type disadvantage
+    call GetCurrentPokemonTypes
+    call GetOpponentTypes
+    call CheckTypeDisadvantage
+    cmp r0, #1
+    beq .considerSwitch
+    
+    ; Check if current Pokemon has low HP
+    call GetCurrentPokemonHP
+    cmp r0, #25  ; 25% HP threshold
+    blt .considerSwitch
+    
+    ; No need to switch
+    mov r0, #0
+    ret
+
+.considerSwitch:
+    ; Find a Pokemon with type advantage or higher HP
+    call FindBetterMatchup
+    cmp r0, #0
+    beq .noSwitch
+    
+    ; Advantageous switch found
+    mov r0, #1
+    ret
+
+.noSwitch:
+    mov r0, #0
+    ret
+
+CheckDisadvantageousMatchup:
+    ; Similar to CheckAdvantageousSwitch, but checks for
+    ; situations where the current matchup is particularly bad
+    ; ... implementation details ...
+    ret
+
+CheckCriticalSituation:
+    ; Check if HP is very low
+    call GetCurrentPokemonHP
+    cmp r0, #10  ; 10% HP threshold
+    blt .critical
+    
+    ; Check if afflicted with major status condition
+    call GetCurrentPokemonStatus
+    cmp r0, #0
+    bne .critical
+    
+    ; Not critical
+    mov r0, #0
+    ret
+
+.critical:
+    mov r0, #1
+    ret
+
+PrioritizeSuperEffectiveMoves:
+    ; Increase score of super effective moves
+    call ScoreMoveEffectiveness
+    cmp r0, #200  ; Super effective
+    bne .done
+    add r1, #50   ; Significant boost to score
+.done:
+    ret
+
+PrioritizeHealingWhenLowHP:
+    ; Check if HP is low
+    call GetCurrentPokemonHP
+    cmp r0, #33  ; 33% HP threshold
+    bgt .done
+    
+    ; Boost score of healing moves
+    call IsMoveHealing
+    cmp r0, #1
+    bne .done
+    add r1, #40  ; Significant boost to healing move score
+.done:
+    ret
+
+PrioritizeStatusMovesEarlyBattle:
+    ; Check if it's early in the battle
+    call GetTurnCount
+    cmp r0, #3   ; First 3 turns
+    bgt .done
+    
+    ; Boost score of status moves
+    call IsMoveStatus
+    cmp r0, #1
+    bne .done
+    add r1, #30  ; Boost status move score early
+.done:
+    ret
