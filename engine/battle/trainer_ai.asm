@@ -145,6 +145,16 @@ AIMoveChoiceModification1:
 	ld [hl], a
 	jr .nextMove
 
+	; Add more sophisticated move scoring
+	call ScoreMoveEffectiveness
+	call ScoreMoveStatus
+	call ScoreMovePower
+	
+	; Prioritize moves based on situation
+	call PrioritizeSuperEffectiveMoves
+	call PrioritizeHealingWhenLowHP
+	call PrioritizeStatusMovesEarlyBattle
+
 StatusAilmentMoveEffects:
 	db EFFECT_01 ; unused sleep effect
 	db SLEEP_EFFECT
@@ -482,7 +492,17 @@ AIUseFullRestore:
 	ld [de], a
 	ld [wHPBarMaxHP+1], a
 	ld [wEnemyMonHP], a
-	jr AIPrintItemUseAndUpdateHPBar
+	
+	call CheckCriticalSituation
+	jr c, .use_item
+	
+	; Only use if HP is below 50%
+	ld a, 50
+	call AICheckIfHPBelowFraction
+	ret nc
+	
+.use_item
+	jp AIPrintItemUseAndUpdateHPBar
 
 AIUsePotion:
 ; enemy trainer heals his monster with a potion
@@ -577,9 +597,21 @@ AISwitchIfEnoughMons:
 
 	ld a, d ; how many available monsters are there?
 	cp 2    ; don't bother if only 1
-	jp nc, SwitchEnemyMon
+	jr nc, .switch
 	and a
 	ret
+
+.switch
+	call CheckAdvantageousSwitch
+	jr c, .switch_mon
+	
+	call CheckDisadvantageousMatchup
+	jr c, .switch_mon
+	
+	ret
+
+.switch_mon
+	jp SwitchEnemyMon
 
 SwitchEnemyMon:
 
