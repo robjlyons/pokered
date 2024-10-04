@@ -813,56 +813,68 @@ CheckDisadvantageousMatchup:
 CheckCriticalSituation:
     ; Check if HP is very low
     call GetCurrentPokemonHP
-    cmp r0, #10  ; 10% HP threshold
-    blt .critical
+    cp 10  ; 10% HP threshold
+    jr c, .critical
     
     ; Check if afflicted with major status condition
     call GetCurrentPokemonStatus
-    cmp r0, #0
-    bne .critical
+    cp 0
+    jr nz, .critical
     
     ; Not critical
-    mov r0, #0
+    xor a  ; Clear a (equivalent to ld a, 0)
     ret
 
 .critical:
-    mov r0, #1
+    ld a, 1
     ret
 
 PrioritizeSuperEffectiveMoves:
     ; Increase score of super effective moves
     call ScoreMoveEffectiveness
-    cmp r0, #200  ; Super effective
-    bne .done
-    add r1, #50   ; Significant boost to score
-.done:
+    cp 200  ; Super effective
+    jr z, .superEffective
+    
+    ; Not super effective
+    ret
+
+.superEffective:
+    ld a, [wAIScore]
+    add 50
+    ld [wAIScore], a
     ret
 
 PrioritizeHealingWhenLowHP:
     ; Check if HP is low
     call GetCurrentPokemonHP
-    cmp r0, #33  ; 33% HP threshold
-    bgt .done
+    cp 33  ; 33% HP threshold
+    jr nc, .done
     
     ; Boost score of healing moves
     call IsMoveHealing
-    cmp r0, #1
-    bne .done
-    add r1, #40  ; Significant boost to healing move score
+    cp 1
+    jr nz, .done
+    ld a, [wAIScore]
+    add 40
+    ld [wAIScore], a
+
 .done:
     ret
 
 PrioritizeStatusMovesEarlyBattle:
     ; Check if it's early in the battle
     call GetTurnCount
-    cmp r0, #3   ; First 3 turns
-    bgt .done
+    cp 3   ; First 3 turns
+    jr nc, .done
     
     ; Boost score of status moves
     call IsMoveStatus
-    cmp r0, #1
-    bne .done
-    add r1, #30  ; Boost status move score early
+    cp 1
+    jr nz, .done
+    ld a, [wAIScore]
+    add 30
+    ld [wAIScore], a
+
 .done:
     ret
 
