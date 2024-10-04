@@ -778,30 +778,30 @@ CheckAdvantageousSwitch:
     call GetCurrentPokemonTypes
     call GetOpponentTypes
     call CheckTypeDisadvantage
-    cmp r0, #1
-    beq .considerSwitch
-    
+    and a  ; Clear carry flag
+    jr z, .checkHP  ; If not disadvantaged, check HP
+
+    ; Type disadvantage found, consider switching
+    jr .considerSwitch
+
+.checkHP
     ; Check if current Pokemon has low HP
     call GetCurrentPokemonHP
-    cmp r0, #25  ; 25% HP threshold
-    blt .considerSwitch
-    
-    ; No need to switch
-    mov r0, #0
-    ret
+    cp 25  ; 25% HP threshold
+    jr nc, .noSwitch  ; If HP >= 25%, don't switch
 
 .considerSwitch:
     ; Find a Pokemon with type advantage or higher HP
     call FindBetterMatchup
-    cmp r0, #0
-    beq .noSwitch
-    
+    and a  ; Check if a better matchup was found
+    jr z, .noSwitch
+
     ; Advantageous switch found
-    mov r0, #1
+    ld a, 1
     ret
 
 .noSwitch:
-    mov r0, #0
+    xor a  ; Load 0 into a (equivalent to ld a, 0)
     ret
 
 CheckDisadvantageousMatchup:
