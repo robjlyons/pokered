@@ -877,28 +877,3 @@ PrioritizeStatusMovesEarlyBattle:
 
 .done:
     ret
-
-DAA:
-  ; After addition
-  jr nc, .no_carry
-  add a, $60
-.no_carry
-  jr nz, .not_zero
-  add a, $06
-.not_zero
-  ; Clear H flag and update other flags
-  ld hl, $FF00  ; Load flag register address
-  res 5, [hl]   ; Clear H flag
-  ; Update other flags as needed
-  ret
-
-; The following code should be in a different section or function
-; ld hl, $C000   ; Load base address
-; ld de, $0010   ; Load offset
-
-; .loop
-;   ld a, [hl]   ; Load value from [HL]
-;   ld [de], a   ; Store value to [DE]
-;   inc hl       ; Increment HL
-;   inc de       ; Increment DE
-;   ; Add loop condition and jump
