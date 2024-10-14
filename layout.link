@@ -177,8 +177,6 @@ ROMX $2B
 	"Pokédex Text"
 ROMX $2C
 	"Move Names"
-ROMX $01
-	"AI Functions"
 WRAM0
 	"Audio RAM"
 	org $c100
@@ -205,3 +203,5 @@ SRAM $3
 HRAM
 	"OAM DMA"
 	"HRAM"
+ROMX $2D
+	"AI Functions"
