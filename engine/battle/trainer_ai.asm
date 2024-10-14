@@ -1041,4 +1041,46 @@ FindBetterMatchup:
     
 .loop
     push bc
-</rewritten_chunk>
+    
+    ; Check if this Pokemon is fainted
+    ld a, [hl + MON_HP]
+    or [hl + MON_HP + 1]
+    jr z, .nextMon  ; Skip if fainted
+    
+    ; Compare types
+    ld a, [hl + MON_TYPE1]
+    ld b, a
+    ld a, [wEnemyMonType1]
+    ld c, a
+    call CalculateTypeEffectiveness
+    cp 2
+    jr nc, .betterMatchup  ; If super effective, we found a better matchup
+    
+    ld a, [hl + MON_TYPE2]
+    ld b, a
+    ld a, [wEnemyMonType2]
+    ld c, a
+    call CalculateTypeEffectiveness
+    cp 2
+    jr nc, .betterMatchup  ; If super effective, we found a better matchup
+    
+.nextMon
+    ld de, PARTYMON_STRUCT_LENGTH
+    add hl, de  ; Move to next party Pokemon
+    pop bc
+    dec b
+    jr nz, .loop
+    
+    ; No better matchup found
+    and a  ; Clear carry flag
+    jr .done
+    
+.betterMatchup
+    pop bc
+    scf  ; Set carry flag
+    
+.done
+    pop bc
+    pop de
+    pop hl
+    ret
