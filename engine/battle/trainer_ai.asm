@@ -878,9 +878,6 @@ PrioritizeStatusMovesEarlyBattle:
 .done:
     ret
 
-SECTION "AI Variables", WRAM0
-wAIScore:: db
-
 SECTION "AI Functions", ROM0
 
 GetCurrentPokemonTypes:

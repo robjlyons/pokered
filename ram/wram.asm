@@ -1,3 +1,6 @@
+SECTION "AI Variables", WRAM0
+wAIScore:: db
+
 SECTION "Audio RAM", WRAM0
 
 wUnusedMusicByte:: db
