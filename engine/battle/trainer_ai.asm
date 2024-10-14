@@ -878,27 +878,12 @@ PrioritizeStatusMovesEarlyBattle:
 .done:
     ret
 
-SECTION "AI Functions", ROMX
-
+SECTION "AI Functions Pokemon", ROMX
 GetCurrentPokemonTypes:
     ld a, [wBattleMonType1]
     ld b, a
     ld a, [wBattleMonType2]
     ld c, a
-    ret
-
-GetOpponentTypes:
-    ld a, [wEnemyMonType1]
-    ld b, a
-    ld a, [wEnemyMonType2]
-    ld c, a
-    ret
-
-CheckTypeDisadvantage:
-    call GetCurrentPokemonTypes
-    call GetOpponentTypes
-    ; Compare types and set carry flag if disadvantaged
-    ; Implementation details depend on how type matchups are stored
     ret
 
 GetCurrentPokemonHP:
@@ -908,15 +893,18 @@ GetCurrentPokemonHP:
     ld l, a
     ret
 
-FindBetterMatchup:
-    ; Iterate through party Pokémon and compare types
-    ; Set carry flag if a better matchup is found
+GetOpponentTypes:
+    ld a, [wEnemyMonType1]
+    ld b, a
+    ld a, [wEnemyMonType2]
+    ld c, a
     ret
 
 GetCurrentPokemonStatus:
     ld a, [wBattleMonStatus]
     ret
 
+SECTION "AI Functions - Move", ROMX
 ScoreMoveEffectiveness:
     ; Calculate type effectiveness and adjust wAIScore
     call GetMoveType
@@ -942,10 +930,6 @@ ScoreMoveEffectiveness:
 IsMoveHealing:
     ; Check if the current move has a healing effect
     ; Set zero flag if it's a healing move
-    ret
-
-GetTurnCount:
-    ld a, [wBattleTurn]
     ret
 
 IsMoveStatus:
@@ -979,4 +963,21 @@ ScoreMoveStatus:
     ld a, [wAIScore]
     add 15
     ld [wAIScore], a
+    ret
+
+SECTION "AI Functions - Other", ROMX
+CheckTypeDisadvantage:
+    call GetCurrentPokemonTypes
+    call GetOpponentTypes
+    ; Compare types and set carry flag if disadvantaged
+    ; Implementation details depend on how type matchups are stored
+    ret
+
+FindBetterMatchup:
+    ; Iterate through party Pokémon and compare types
+    ; Set carry flag if a better matchup is found
+    ret
+
+GetTurnCount:
+    ld a, [wBattleTurn]
     ret
