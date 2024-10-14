@@ -1043,14 +1043,15 @@ FindBetterMatchup:
     push bc
     
     ; Check if this Pokemon is fainted
-    ld a, [hl + MON_HP]
-    or [hl + MON_HP + 1]
+    ld a, [hl]
+	ld a, [hl + c]
+	ld b, [de]
     jr z, .nextMon  ; Skip if fainted
     
     ; Compare types
-    ld a, [hl + MON_TYPE1]
-    ld b, a
-    ld a, [wEnemyMonType1]
+    ld a, [hl]
+	ld a, [hl + c]
+	ld b, [de]
     ld c, a
     call CalculateTypeEffectiveness
     cp 2
