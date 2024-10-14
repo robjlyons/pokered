@@ -965,6 +965,10 @@ ScoreMoveStatus:
     ld [wAIScore], a
     ret
 
+GetMoveType::
+       ; Implementation here
+       ret
+
 SECTION "AI Functions - Other", ROMX
 CheckTypeDisadvantage:
     call GetCurrentPokemonTypes
@@ -973,11 +977,68 @@ CheckTypeDisadvantage:
     ; Implementation details depend on how type matchups are stored
     ret
 
-FindBetterMatchup:
-    ; Iterate through party Pokémon and compare types
-    ; Set carry flag if a better matchup is found
+CalculateTypeEffectiveness::
+    ; Input: 
+    ; - b: attacking move type
+    ; - c: defending Pokemon type 1
+    ; - d: defending Pokemon type 2
+    ; Output:
+    ; - a: effectiveness multiplier (1 = normal, 2 = super effective, 0 = no effect, etc.)
+    push hl
+    push de
+    push bc
+    
+    ld hl, TypeEffectivenessTable
+    ld a, b
+    ld de, 18  ; 18 types in total
+    call MultiplyDE
+    add hl, de
+    
+    ld a, c
+    add l
+    ld l, a
+    jr nc, .noCarry1
+    inc h
+.noCarry1
+    ld a, [hl]
+    ld e, a    ; Store first type effectiveness in e
+    
+    ld a, d
+    cp c       ; Check if second type is different from first
+    jr z, .done
+    
+    ld a, d
+    add l
+    ld l, a
+    jr nc, .noCarry2
+    inc h
+.noCarry2
+    ld a, [hl]
+    ld d, a    ; Store second type effectiveness in d
+    
+    ; Multiply the two effectiveness values
+    call MultiplyDE
+    ld a, e
+    
+.done
+    pop bc
+    pop de
+    pop hl
     ret
 
-GetTurnCount:
-    ld a, [wBattleTurn]
-    ret
+FindBetterMatchup:
+    ; Input: None (assumes current Pokemon data is accessible)
+    ; Output: Carry flag set if better matchup found, clear if not
+    ; Uses: Party Pokemon data structure, opponent's type
+    push hl
+    push de
+    push bc
+    
+    ld hl, wPartyCount
+    ld a, [hl]
+    ld b, a    ; b = number of Pokemon in party
+    inc hl     ; hl now points to first party Pokemon
+    
+.loop
+    push bc
+</rewritten_chunk>
