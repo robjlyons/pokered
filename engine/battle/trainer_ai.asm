@@ -877,3 +877,109 @@ PrioritizeStatusMovesEarlyBattle:
 
 .done:
     ret
+
+SECTION "AI Variables", WRAM0
+wAIScore:: db
+
+SECTION "AI Functions", ROM0
+
+GetCurrentPokemonTypes:
+    ld a, [wBattleMonType1]
+    ld b, a
+    ld a, [wBattleMonType2]
+    ld c, a
+    ret
+
+GetOpponentTypes:
+    ld a, [wEnemyMonType1]
+    ld b, a
+    ld a, [wEnemyMonType2]
+    ld c, a
+    ret
+
+CheckTypeDisadvantage:
+    call GetCurrentPokemonTypes
+    call GetOpponentTypes
+    ; Compare types and set carry flag if disadvantaged
+    ; Implementation details depend on how type matchups are stored
+    ret
+
+GetCurrentPokemonHP:
+    ld a, [wBattleMonHP]
+    ld h, a
+    ld a, [wBattleMonHP + 1]
+    ld l, a
+    ret
+
+FindBetterMatchup:
+    ; Iterate through party Pokémon and compare types
+    ; Set carry flag if a better matchup is found
+    ret
+
+GetCurrentPokemonStatus:
+    ld a, [wBattleMonStatus]
+    ret
+
+ScoreMoveEffectiveness:
+    ; Calculate type effectiveness and adjust wAIScore
+    call GetMoveType
+    call GetOpponentTypes
+    call CalculateTypeEffectiveness
+    cp 2
+    jr z, .superEffective
+    cp 1
+    jr z, .normalEffective
+    ; Not very effective
+    ld a, [wAIScore]
+    sub 20
+    ld [wAIScore], a
+    ret
+.normalEffective
+    ret
+.superEffective
+    ld a, [wAIScore]
+    add 30
+    ld [wAIScore], a
+    ret
+
+IsMoveHealing:
+    ; Check if the current move has a healing effect
+    ; Set zero flag if it's a healing move
+    ret
+
+GetTurnCount:
+    ld a, [wBattleTurn]
+    ret
+
+IsMoveStatus:
+    ; Check if the current move is a status move
+    ; Set zero flag if it's a status move
+    ret
+
+ScoreMovePower:
+    ; Adjust wAIScore based on move power
+    ld a, [wMovepower]
+    cp 80
+    jr nc, .highPower
+    cp 50
+    jr nc, .mediumPower
+    ; Low power
+    ld a, [wAIScore]
+    sub 10
+    ld [wAIScore], a
+    ret
+.mediumPower
+    ret
+.highPower
+    ld a, [wAIScore]
+    add 20
+    ld [wAIScore], a
+    ret
+
+ScoreMoveStatus:
+    call IsMoveStatus
+    ret nz
+    ld a, [wAIScore]
+    add 15
+    ld [wAIScore], a
+    ret
