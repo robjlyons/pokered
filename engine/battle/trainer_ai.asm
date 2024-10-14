@@ -977,6 +977,11 @@ CheckTypeDisadvantage:
     ; Implementation details depend on how type matchups are stored
     ret
 
+INCLUDE "constants/ram.asm"
+INCLUDE "engine/math/multiply.asm"
+INCLUDE "data/types/effectiveness.asm"
+INCLUDE "engine/battle/turn_counter.asm"
+
 CalculateTypeEffectiveness::
     ; Input: 
     ; - b: attacking move type
