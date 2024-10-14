@@ -878,7 +878,7 @@ PrioritizeStatusMovesEarlyBattle:
 .done:
     ret
 
-SECTION "AI Functions", ROM0
+SECTION "AI Functions", ROMX
 
 GetCurrentPokemonTypes:
     ld a, [wBattleMonType1]
