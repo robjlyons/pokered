@@ -204,7 +204,6 @@ HRAM
 	"OAM DMA"
 	"HRAM"
 ROMX $2D
-	"AI Functions"
 	"AI Functions Pokemon"
 	"AI Functions - Move"
 	"AI Functions - Other"
